@@ -3,6 +3,7 @@ import pickle
 import logging
 import numpy as np
 
+# Default values for variables. Ignored if weights are loaded from the weights pickle file.
 
 INPUT_NODES = 3
 HIDDEN_NODES = 8
@@ -10,30 +11,20 @@ OUTPUT_NODES = 1
 TOTAL_NETWORKS = 12
 
 
-def load_weights_from_csv(csv_location):
+def load_weights_from_csv(weights_csv_location):
     """
     Loads the weights from a CSV file into 4 objects. Not recommended for regular use. The CSV structure is complicated
     and prone to errors. Instead use `np.ndarray`s of equivalent type.
 
-    :param csv_location: Location of the CSV file on disk.
-    :return: - wih: Weights for the neural network connecting the input-hidden layer. 3D array of type `np.ndarray` with
-                    dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of input nodes, `k` is
-                    the number of hidden layer nodes.
-             - whh: Weights for the neural network connecting the previous hidden values-hidden layer. 3D array of type
-                    `np.ndarray` with dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of
-                    previous hidden layer nodes, `k` is the number of hidden layer nodes.
-             - who: Weights for the neural network connecting the hidden-output layer. 3D array of type `np.ndarray`
-                    with dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of hidden layer
-                    nodes, `k` is the number of output layer nodes (expected to be 1).
-             - prh: Previous hidden layer values. 2D array of type `np.ndarray` of dimensions `[i, j]` where `i` is the
-                    number of networks, `j` is the number of previous hidden layer nodes.
+    :param weights_csv_location: Location of the weights CSV file on disk.
+    :return: wih, whh, who, prh
     """
     wih = np.zeros((TOTAL_NETWORKS, INPUT_NODES + 1, HIDDEN_NODES))
     whh = np.zeros((TOTAL_NETWORKS, HIDDEN_NODES, HIDDEN_NODES))
     who = np.zeros((TOTAL_NETWORKS, HIDDEN_NODES + 1, OUTPUT_NODES))
     prh = np.zeros((TOTAL_NETWORKS, HIDDEN_NODES))
 
-    weights_file = open(csv_location, 'r')
+    weights_file = open(weights_csv_location, 'r')
     weights_data = csv.reader(weights_file)
 
     network = 0
@@ -79,18 +70,8 @@ def load_weights_from_pickle_dump(dump_location):
     """
     Returns the un-pickled output from a pickle-d array dump. Recommended for persisting the network state for next run.
 
-    :param dump_location: Location of the array to be loaded.
-    :return: - wih: Weights for the neural network connecting the input-hidden layer. 3D array of type `np.ndarray` with
-                    dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of input nodes, `k` is
-                    the number of hidden layer nodes.
-             - whh: Weights for the neural network connecting the previous hidden values-hidden layer. 3D array of type
-                    `np.ndarray` with dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of
-                    previous hidden layer nodes, `k` is the number of hidden layer nodes.
-             - who: Weights for the neural network connecting the hidden-output layer. 3D array of type `np.ndarray`
-                    with dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of hidden layer
-                    nodes, `k` is the number of output layer nodes (expected to be 1).
-             - prh: Previous hidden layer values. 2D array of type `np.ndarray` of dimensions `[i, j]` where `i` is the
-                    number of networks, `j` is the number of previous hidden layer nodes.
+    :param dump_location
+    :return: [wih, whh, who, prh]
     """
     dump_file = open(dump_location, 'rb')
     list_weights = pickle.load(dump_file)
@@ -102,18 +83,7 @@ def save_weights_to_pickle_dump(dump_location, wih, whh, who, prh):
     """
     Stores a pickle-d array for persisting the network state for next run.
 
-    :param dump_location: Location of the array to be loaded.
-    :param wih: Weights for the neural network connecting the input-hidden layer. 3D array of type `np.ndarray` with
-                dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of input nodes, `k` is the
-                number of hidden layer nodes.
-    :param whh: Weights for the neural network connecting the previous hidden values-hidden layer. 3D array of type
-                `np.ndarray` with dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of
-                previous hidden layer nodes, `k` is the number of hidden layer nodes.
-    :param who: Weights for the neural network connecting the hidden-output layer. 3D array of type `np.ndarray` with
-                dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of hidden layer nodes, `k`
-                is the number of output layer nodes (expected to be 1).
-    :param prh: Previous hidden layer values. 2D array of type `np.ndarray` of dimensions `[i, j]` where `i` is the
-                number of networks, `j` is the number of previous hidden layer nodes.
+    :param dump_location, wih, whh, who, prh
     """
     dump_file = open(dump_location, 'wb')
     pickle.dump([wih, whh, who, prh], dump_file)
@@ -123,20 +93,8 @@ def save_weights_to_pickle_dump(dump_location, wih, whh, who, prh):
 def read_input_file(input_location):
     """
 
-    :param input_location: Location to the input CSV file for prediction.
-    :return: - inputs: List of multiple `[day, temp, prec]` lists containing the real-world values of the input
-                       variables. Ranges do not correspond to maximum or minimum possible, but approximately to
-                        [- 2.5 standard deviations, + 2.5 standard deviation].
-                -- day: Integer value for day of the year. Range: [0-365]
-                -- temp: Integer value of maximum temperature for the day, as tenths of degrees Celsius. For 30.0C, the
-                         value of this variable should be 300. Range: [-100, 300]
-                -- prec: Integer value for precipitation (sum of rainfall and snowfall) of the day, in mm.
-                         Range: [0, 252]
-             - networks: List containing the index of networks these inputs should run on. Typically corresponds to the
-                        month of the year the prediction is for. The length of this list is the same as the length of
-                        input list. Range: [0, 11]
-             - targets: List containing target values for the given inputs. The length of this list is the same as the
-                        length of input list.
+    :param input_location: Location on disk to the input CSV file for prediction.
+    :return: inputs, networks, targets
     """
     input_file = open(input_location, 'r')
     input_lines = csv.reader(input_file)
@@ -156,10 +114,7 @@ def write_output_to_file(targets, predictions, output_location):
     """
     Writes the output to a CSV file.
 
-    :param targets: List containing target values for the given inputs. The length of this list is the same as the
-                    length of input list.
-    :param predictions: List containing predicted values for the given inputs. The length of this list is the same as
-                        the length of input list.
+    :param targets, predictions
     :param output_location: String containing the address on disk for the output file.
     """
     output_file = open(output_location, 'w', newline='')
@@ -173,7 +128,7 @@ def write_output_to_file(targets, predictions, output_location):
 
 def log_to_console():
     """
-    Initiates a console logger and sets the format. Recommended if not running through an IDE or a Jupyter Notebook.
+    Initiates a console logger. Recommended if running through an IDE or from the command line.
     """
     logger = logging.getLogger()
     logger.setLevel('DEBUG')
