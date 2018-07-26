@@ -2,9 +2,6 @@ import numpy as np
 from .file_io import *
 from .network import recurrent_neural_network
 
-__authors__ = 'Setu Shah'
-__version = '0.1'
-
 """
 Descriptions for most recurring variables across functions.
 
@@ -56,3 +53,6 @@ Miscellaneous parameters:
 -------------------------
 - dump_location: Location of the weights pickle file on disk.
 """
+
+__authors__ = 'Setu Shah'
+__version = '0.2'
