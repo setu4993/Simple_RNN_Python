@@ -171,12 +171,12 @@ class recurrent_neural_network:
                 predictions.append(self.predict_single(inp, networks[i], recal))
                 print('The prediction for inputs ', inp, ' is: %.2f' % predictions[-1])
             else:
-                self.clear()
                 predictions.append(self.predict_single(inp, networks[i], recal, targets[i]))
                 print('The target for inputs ', inp, ' for network ', networks[i], ' was ', targets[i],
                       'and the prediction was %.2f, error observed was %.2f%%. ' % (predictions[-1],
                                                                                  abs(predictions[-1] - targets[i]) * 100
                                                                                  / targets[i]))
+            self.clear()
         return predictions
 
     def backprop(self, input_nodes, target, network):
