@@ -168,10 +168,10 @@ class recurrent_neural_network:
         predictions = []
         for i, inp in enumerate(inputs):
             if not recal:
-                predictions.append(self.predict_single(inp, networks[i], recal))
-                print('The prediction for inputs ', inp, ' is: %.2f' % predictions[-1])
+                predictions.append(self.predict_single(inp, networks[i], recal=recal))
+                print('The prediction for inputs ', inp, ' for network ', networks[i], ' is %.2f' % predictions[-1])
             else:
-                predictions.append(self.predict_single(inp, networks[i], recal, targets[i]))
+                predictions.append(self.predict_single(inp, networks[i], recal=recal, target=targets[i]))
                 print('The target for inputs ', inp, ' for network ', networks[i], ' was ', targets[i],
                       'and the prediction was %.2f, error observed was %.2f%%. ' % (predictions[-1],
                                                                                  abs(predictions[-1] - targets[i]) * 100
