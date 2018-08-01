@@ -210,9 +210,9 @@ class recurrent_neural_network:
         if recal and not targets:
                 raise AttributeError('Attribute `targets` not found')
         if isinstance(inputs[-1], list):
-            predictions = self.predict_many(inputs, networks, recal, targets)
+            predictions = self.predict_many(inputs, networks, recal=recal, targets=targets)
         elif isinstance(inputs[-1], int):
-            predictions = [self.predict_single(inputs, networks, recal, targets)]
+            predictions = [self.predict_single(inputs, networks, recal=recal, targets=targets)]
         else:
             raise TypeError('Type of `inputs` incorrect')
         return predictions
