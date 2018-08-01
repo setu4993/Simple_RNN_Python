@@ -68,7 +68,7 @@ class recurrent_neural_network:
         This function saves the weights to the pickle file location specified.
         :param dump_location
         """
-        save_weights_to_pickle_dump(dump_location, self.wih, self.whh, self.who, self.prh)
+        save_weights_to_pickle_dump(dump_location, self.wih, self.whh, self.who, self.prev_nodes)
 
     def calc_hidden(self, input_nodes, network):
         """
