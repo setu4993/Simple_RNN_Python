@@ -117,6 +117,7 @@ def write_output_to_file(targets, predictions, output_location):
     :param targets, predictions
     :param output_location: String containing the address on disk for the output file.
     """
+    logging.info('Writing predictions to file')
     output_file = open(output_location, 'w', newline='')
     output_writer = csv.DictWriter(output_file, fieldnames=['Target', 'Prediction', 'Error', 'Error Percentage'])
     output_writer.writeheader()
@@ -124,6 +125,7 @@ def write_output_to_file(targets, predictions, output_location):
         output_writer.writerow({'Target': t, 'Prediction': p, 'Error': abs(t - p), 'Error Percentage':
             (abs(t - p) / t * 100)})
     output_file.close()
+    logging.info('Predictions written to file')
 
 
 def log_to_console():
@@ -136,3 +138,4 @@ def log_to_console():
     logger.addHandler(consoleHandler)
     formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
     consoleHandler.setFormatter(formatter)
+    logging.info('Logger enabled and logging')

@@ -1,5 +1,6 @@
 import numpy as np
 from .file_io import *
+import logging
 
 
 class recurrent_neural_network:
@@ -20,8 +21,10 @@ class recurrent_neural_network:
         """
         if isinstance(weights, str):
             [wih, whh, who, prh] = self.load(weights)
+            logging.info('Weights loaded from pickle file')
         elif isinstance(weights, list):
             [wih, whh, who, prh] = weights
+            logging.info('Weights loaded from passed array')
         else:
             raise TypeError('Incorrect type passed to the class')
         self.TOTAL_NETWORKS = wih.shape[0]
@@ -51,6 +54,8 @@ class recurrent_neural_network:
         if log:
             log_to_console()
 
+        logging.info('Network initialized')
+
     def load(self, weights_file_location):
         """
         This function loads the weights file by using the functions from `file_io.py`, based on input provided.
@@ -69,6 +74,7 @@ class recurrent_neural_network:
         :param dump_location
         """
         save_weights_to_pickle_dump(dump_location, self.wih, self.whh, self.who, self.prev_nodes)
+        logging.info('Weights dumped to pickle file')
 
     def calc_hidden(self, input_nodes, network):
         """
@@ -165,6 +171,7 @@ class recurrent_neural_network:
         :params inputs, networks, targets, recal
         :return: predictions
         """
+        logging.info('Making multiple predictions')
         predictions = []
         for i, inp in enumerate(inputs):
             if not recal:
@@ -177,6 +184,7 @@ class recurrent_neural_network:
                                                                                  abs(predictions[-1] - targets[i]) * 100
                                                                                  / targets[i]))
             self.clear()
+        logging.info('All predictions made')
         return predictions
 
     def backprop(self, input_nodes, target, network):
