@@ -160,6 +160,9 @@ class rnn_base:
         self.who[network] += self.delta_who
         self.prev_nodes[network] = self.hidden_nodes[:self.HIDDEN_NODES_NUM]
 
+    def network_state(self):
+        return [self.wih, self.whh, self.who, self.prev_nodes]
+
 
 class rnn_train(rnn_base):
     def __init__(self, input_nodes_num, hidden_nodes_num, output_nodes_num, total_networks=1, alpha=0.25, i_bias=True,
