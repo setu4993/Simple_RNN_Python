@@ -1,4 +1,3 @@
-import numpy as np
 from .file_io import *
 from .network import recurrent_neural_network
 
