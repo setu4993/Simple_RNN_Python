@@ -1,5 +1,5 @@
 from .file_io import *
-from .network import recurrent_neural_network
+from .network import rnn_base, rnn_train, rnn_predict
 
 """
 Descriptions for most recurring variables across functions.

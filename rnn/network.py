@@ -3,11 +3,11 @@ from .file_io import *
 import logging
 
 
-class recurrent_neural_network:
+class rnn_base:
     """
     This class implements the recurrent neural network.
     """
-    def __init__(self, weights, alpha=0.38, h_bias=True, log=False):
+    def __init__(self, wih, whh, who, prh, alpha=0.38, h_bias=True, log=False):
         """
         This function initializes the various parameters of the recurrent neural network.
 
@@ -19,28 +19,22 @@ class recurrent_neural_network:
                         model includes a bias node). Defaults to True.
         :param log:     [Optional] Boolean variable indicating if logging is to be enabled.
         """
-        if isinstance(weights, str):
-            [wih, whh, who, prh] = self.load(weights)
-            logging.info('Weights loaded from pickle file')
-        elif isinstance(weights, list):
-            [wih, whh, who, prh] = weights
-            logging.info('Weights loaded from passed array')
-        else:
-            raise TypeError('Incorrect type passed to the class')
+
         self.TOTAL_NETWORKS = wih.shape[0]
 
         self.INPUT_NODES_NUM = wih.shape[1] - 1
         self.HIDDEN_NODES_NUM = wih.shape[2]
         self.OUTPUT_NODES_NUM = who.shape[2]
 
-        self.hidden_nodes = np.zeros(self.HIDDEN_NODES_NUM)
-        self.output_nodes = np.zeros(self.OUTPUT_NODES_NUM)
-
         self.wih = wih
         self.whh = whh
         self.who = who
 
         self.prev_nodes = prh
+
+        self.hidden_nodes = np.zeros(self.HIDDEN_NODES_NUM)
+        self.output_nodes = np.zeros(self.OUTPUT_NODES_NUM)
+
 
         self.ALPHA = alpha
 
@@ -54,7 +48,7 @@ class recurrent_neural_network:
         if log:
             log_to_console()
 
-        logging.info('Network initialized')
+        logging.info('RNN initialized')
 
     def load(self, weights_file_location):
         """
@@ -150,6 +144,97 @@ class recurrent_neural_network:
         nodes[2] = np.tanh((inp[2] - 126) / 63)
         return np.concatenate((nodes, np.ones(1)))
 
+    def backprop(self, input_nodes, target, network):
+        """
+        This function implements the back-propagation that allows the network to learn from the errors in predictions.
+
+        :param input_nodes, target:, network
+        """
+        self.delta_ho = (target - self.output_nodes) * (1 - np.square(np.tanh(self.output_nodes)))
+        self.delta_who = (self.ALPHA * self.delta_ho * self.hidden_nodes).reshape(self.HIDDEN_NODES_NUM + 1, 1)
+        self.delta_in = self.delta_ho * self.who[network]
+        self.delta_ih = self.delta_in * (1 - np.square(np.tanh(self.hidden_nodes))).reshape(self.HIDDEN_NODES_NUM + 1, 1)
+
+        self.wih[network] += (self.ALPHA * self.delta_ih[:self.HIDDEN_NODES_NUM] * input_nodes).T
+        self.whh[network] += (self.ALPHA * self.delta_ih[:self.HIDDEN_NODES_NUM] * self.prev_nodes[network]).T
+        self.who[network] += self.delta_who
+        self.prev_nodes[network] = self.hidden_nodes[:self.HIDDEN_NODES_NUM]
+
+
+class rnn_train(rnn_base):
+    def __init__(self, input_nodes_num, hidden_nodes_num, output_nodes_num, total_networks=1, alpha=0.25, i_bias=True,
+                 h_bias=True, log=False, random_seed=12314):
+        if i_bias:
+            input_nodes_num += 1
+        if h_bias:
+            hidden_nodes_num += 1
+
+        np.random.seed(random_seed)
+
+        wih = 2 * np.random.random((total_networks, input_nodes_num, hidden_nodes_num - 1)) - 1
+        whh = 2 * np.random.random((total_networks, hidden_nodes_num - 1, hidden_nodes_num - 1)) - 1
+        who = 2 * np.random.random((total_networks, hidden_nodes_num, output_nodes_num)) - 1
+
+        prh = np.zeros((total_networks, hidden_nodes_num - 1))
+
+        logging.info('Random arrays created')
+
+        rnn_base.__init__(self, wih, whh, who, prh, alpha=alpha, h_bias=h_bias, log=log)
+
+    def train_single(self, inp, network, target):
+        """
+        Makes a prediction for one set of input values.
+
+        :param inp, network
+        :return: prediction
+        """
+        input_nodes = self.pre_process_input_values(inp)
+        self.calc_hidden(input_nodes, network)
+        self.calc_output(network)
+        self.backprop(input_nodes, self.downscale_output(target), network)
+
+    def train_many(self, inputs, networks, targets):
+        """
+        This function makes predictions if a list of lists in given as input.
+
+        :params inputs, networks, targets, recal
+        :return: predictions
+        """
+        for i, (inp, network, target) in enumerate(zip(inputs, networks, targets)):
+            self.train_single(inp, network, target)
+            self.clear()
+
+    def train(self, inputs, targets, networks=None, epochs=50000):
+        if not networks:
+            networks = np.zeros(len(inputs), np.int32)
+        else:
+            assert len(inputs) == len(networks), "Length of inputs and networks not equal"
+
+        if isinstance(inputs[-1], int) or len(inputs) == 1:
+            logging.warning('Network is trained best when multiple inputs are specified')
+
+        assert len(inputs) == len(targets), "Length of inputs and targets not equal"
+
+        for i in range(epochs):
+            self.train_many(inputs, networks, targets)
+            if i % 1000 == 0:
+                logging.info('Epoch %d completed' % i)
+        logging.info('RNN trained')
+
+
+class rnn_predict(rnn_base):
+    def __init__(self, weights, alpha=0.38, h_bias=True, log=False):
+        if isinstance(weights, str):
+            [wih, whh, who, prh] = self.load(weights)
+            logging.info('Weights loaded from pickle file')
+        elif isinstance(weights, list):
+            [wih, whh, who, prh] = weights
+            logging.info('Weights loaded from passed array')
+        else:
+            raise TypeError('Incorrect type passed to the class')
+
+        rnn_base.__init__(self, wih, whh, who, prh, alpha=alpha, h_bias=h_bias, log=log)
+
     def predict_single(self, inp, network, recal=False, target=None):
         """
         Makes a prediction for one set of input values.
@@ -187,23 +272,7 @@ class recurrent_neural_network:
         logging.info('All predictions made')
         return predictions
 
-    def backprop(self, input_nodes, target, network):
-        """
-        This function implements the back-propagation that allows the network to learn from the errors in predictions.
-
-        :param input_nodes, target:, network
-        """
-        self.delta_ho = (target - self.output_nodes) * (1 - np.square(np.tanh(self.output_nodes)))
-        self.delta_who = (self.ALPHA * self.delta_ho * self.hidden_nodes).reshape(self.HIDDEN_NODES_NUM + 1, 1)
-        self.delta_in = self.delta_ho * self.who[network]
-        self.delta_ih = self.delta_in * (1 - np.square(np.tanh(self.hidden_nodes))).reshape(self.HIDDEN_NODES_NUM + 1, 1)
-
-        self.wih[network] += (self.ALPHA * self.delta_ih[:self.HIDDEN_NODES_NUM] * input_nodes).T
-        self.whh[network] += (self.ALPHA * self.delta_ih[:self.HIDDEN_NODES_NUM] * self.prev_nodes[network]).T
-        self.who[network] += self.delta_who
-        self.prev_nodes[network] = self.hidden_nodes[:self.HIDDEN_NODES_NUM]
-
-    def run_network(self, inputs, networks=None, targets=None, recal=False):
+    def predict(self, inputs, networks=None, targets=None, recal=False):
         """
         This function is the primary interface of the class. This is the function that should be called to make
         predictions and for back-propagation.
