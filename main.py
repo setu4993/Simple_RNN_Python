@@ -6,7 +6,8 @@ INPUT_FILE = os.path.join(DATA_LOCATION, 'input_files', 'water_6_17_reduced_2_ca
 
 
 if __name__ == '__main__':
-    rnn = recurrent_neural_network(os.path.join(DATA_LOCATION, 'input_files', 'rnn_retrained_16.pickle'), alpha=0.38, log=True)
+    rnn = recurrent_neural_network(os.path.join(DATA_LOCATION, 'input_files', 'daily_rnn_retrained_16.pickle'), alpha=0.38, log=True)
     inputs, networks, targets = read_input_file(INPUT_FILE)
     predictions = rnn.run_network(inputs, networks=networks, targets=targets, recal=True)
-    write_output_to_file(targets, predictions, os.path.join(DATA_LOCATION, 'input_files', 'predictions_2017.csv'))
+    write_output_to_file(targets, predictions, os.path.join(DATA_LOCATION, 'predictions_2017.csv'))
+    rnn.save(os.path.join(DATA_LOCATION, 'input_files', 'daily_rnn_retrained_17.pickle'))
