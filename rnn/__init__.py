@@ -54,4 +54,4 @@ Miscellaneous parameters:
 """
 
 __authors__ = 'Setu Shah'
-__version = '0.3'
+__version = '0.4'
