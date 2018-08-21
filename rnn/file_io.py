@@ -133,9 +133,9 @@ def log_to_console():
     Initiates a console logger. Recommended if running through an IDE or from the command line.
     """
     logger = logging.getLogger()
-    logger.setLevel('DEBUG')
-    consoleHandler = logging.StreamHandler()
-    logger.addHandler(consoleHandler)
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-    consoleHandler.setFormatter(formatter)
+    logger.handlers = []
+    logger.setLevel(logging.INFO)
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
+    logger.addHandler(console_handler)
     logging.info('Logger enabled and logging')
