@@ -29,23 +29,20 @@ Output parameters:
 Network parameters:
 -------------------
 
-- inp:  List of real-world `[day, temp, prec]` values.
-- wih:  Weights for the neural network connecting the input-hidden layer. 3D array of type `np.ndarray` with dimensions 
-        `[i, j, k]` where `i` is the number of networks, `j` is the number of input nodes, `k` is the number of hidden 
-        layer nodes.
-- whh:  Weights for the neural network connecting the previous hidden values-hidden layer. 3D array of type `np.ndarray` 
-        with dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of previous hidden layer 
-        nodes, `k` is the number of hidden layer nodes.
-- who:  Weights for the neural network connecting the hidden-output layer. 3D array of type `np.ndarray` with dimensions 
-        `[i, j, k]` where `i` is the number of networks, `j` is the number of hidden layer nodes, `k` is the number of 
-        output layer nodes (expected to be 1).
-- prh:  Previous hidden layer values. 2D array of type `np.ndarray` of dimensions `[i, j]` where `i` is the number of 
-        networks, `j` is the number of previous hidden layer nodes.        
-- input_nodes: A `np.ndarray` of pre-processed input values that are used as an input to the network.
-- network: Integer value specifying the network to use for making the prediction between [0, 11].
-- prediction: Prediction of water demand for the given input and network values.
-
-- predictions: List of predictions.
+- inp:          List of real-world `[day, temp, prec]` values.
+- wih:          Weights for the neural network connecting the input-hidden layer. 3D array of type `np.ndarray` with 
+                dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of input nodes, `k` is the number of hidden 
+                layer nodes.
+- whh:          Weights for the neural network connecting the previous hidden values-hidden layer. 3D array of type 
+                `np.ndarray` with dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of 
+                previous hidden layer nodes, `k` is the number of hidden layer nodes.
+- who:          Weights for the neural network connecting the hidden-output layer. 3D array of type `np.ndarray` with 
+                dimensions `[i, j, k]` where `i` is the number of networks, `j` is the number of hidden layer nodes, `k` 
+                is the number of output layer nodes (expected to be 1).
+- prh:          Previous hidden layer values. 2D array of type `np.ndarray` of dimensions `[i, j]` where `i` is the 
+                number of networks, `j` is the number of previous hidden layer nodes.        
+- input_nodes:  A `np.ndarray` of pre-processed input values that are used as an input to the network.
+- network:      Integer value specifying the network to use for making the prediction between [0, 11].
 
 
 Miscellaneous parameters:
