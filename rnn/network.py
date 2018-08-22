@@ -159,7 +159,7 @@ class rnn_base:
 
     def network_state(self):
         """
-        This function returns the network state that can be used as parameters for creating a prediction network.
+        This function returns the network state that can be used as a parameter for creating a prediction network.
 
         :return: A list containing [wih, whh, who, prh].
         """
