@@ -45,8 +45,6 @@ class rnn_base:
         if log:
             log_to_console()
 
-        logging.info('RNN initialized')
-
     def load(self, weights_file_location):
         """
         This function loads the weights file by using the functions from `file_io.py`, based on input provided.
@@ -201,6 +199,7 @@ class rnn_train(rnn_base):
         logging.info('Random arrays created')
 
         rnn_base.__init__(self, wih, whh, who, prh, alpha=alpha, h_bias=h_bias, log=log)
+        logging.info('Training RNN initialized')
 
     def train_single(self, inp, network, target):
         """
@@ -270,6 +269,7 @@ class rnn_predict(rnn_base):
             raise TypeError('Incorrect type passed to the class')
 
         rnn_base.__init__(self, wih, whh, who, prh, alpha=alpha, h_bias=h_bias, log=log)
+        logging.info('Prediction RNN initialized')
 
     def predict_single(self, inp, network, recal=False, target=None):
         """
