@@ -43,11 +43,14 @@ Network parameters:
                 number of networks, `j` is the number of previous hidden layer nodes.        
 - input_nodes:  A `np.ndarray` of pre-processed input values that are used as an input to the network.
 - network:      Integer value specifying the network to use for making the prediction between [0, 11].
+- alpha:        Alpha value for back-propagation, typically in the range of `(0, 1)`. Use lower values for training and 
+                higher values during online testing.
 
 
 Miscellaneous parameters:
 -------------------------
 - dump_location: Location of the weights pickle file on disk.
+- log:           Boolean flag indicating if logging to console should be enabled.
 """
 
 __authors__ = 'Setu Shah'

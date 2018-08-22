@@ -11,13 +11,10 @@ class rnn_base:
         """
         This function initializes the various parameters of the recurrent neural network.
 
-        :param weights: Either a string that points to the location of the weights pickle file, or the list from the
-                        un-pickled weights file. List should be of the format `[wih, whh, who, prh]`.
-        :param alpha:   [Optional] Alpha value for back-propagation, typically in the range of `(0, 1)`.
-                        Defaults to 0.38.
-        :param h_bias:  [Optional] Boolean variable indicating if hidden layer consists of a bias node (pre-trained
-                        model includes a bias node). Defaults to True.
-        :param log:     [Optional] Boolean variable indicating if logging is to be enabled.
+        :param wih, whh, who, prh, alpha
+        :param h_bias:              [Optional] Boolean variable indicating if hidden layer consists of a bias node
+                                    (pre-trained model includes a bias node). Defaults to True.
+        :param log:                 [Optional] Boolean variable indicating if logging is to be enabled.
         """
 
         self.TOTAL_NETWORKS = wih.shape[0]
@@ -161,12 +158,33 @@ class rnn_base:
         self.prev_nodes[network] = self.hidden_nodes[:self.HIDDEN_NODES_NUM]
 
     def network_state(self):
+        """
+        This function returns the network state that can be used as parameters for creating a prediction network.
+
+        :return: A list containing [wih, whh, who, prh].
+        """
         return [self.wih, self.whh, self.who, self.prev_nodes]
 
 
 class rnn_train(rnn_base):
+    """
+    This is a sub-class of the `rnn_base` class, which implements the training methods.
+    """
     def __init__(self, input_nodes_num, hidden_nodes_num, output_nodes_num, total_networks=1, alpha=0.25, i_bias=True,
                  h_bias=True, log=False, random_seed=12314):
+        """
+        This function initializes the parameters for this class and the parent class.
+
+        :param input_nodes_num:     Integer specifying number of input nodes.
+        :param hidden_nodes_num:    Integer specifying number of hidden nodes.
+        :param output_nodes_num:    Integer specifying number of output nodes.
+        :param total_networks:      [Optional] Number of networks to train over. Defaults to 1.
+        :param i_bias:              [Optional] Boolean variable indicating if input layer consists of a bias node.
+                                    Defaults to True.
+        :param alpha, h_bias, log
+        :param random_seed:         [Optional] Integer value for specifying the random seed (use the same seed for
+                                    reproducibility). Defaults to 12314.
+        """
         if i_bias:
             input_nodes_num += 1
         if h_bias:
@@ -186,10 +204,9 @@ class rnn_train(rnn_base):
 
     def train_single(self, inp, network, target):
         """
-        Makes a prediction for one set of input values.
+        This function implements training for one set of input, network and target values.
 
-        :param inp, network
-        :return: prediction
+        :param inp, network, target
         """
         input_nodes = self.pre_process_input_values(inp)
         self.calc_hidden(input_nodes, network)
@@ -198,16 +215,22 @@ class rnn_train(rnn_base):
 
     def train_many(self, inputs, networks, targets):
         """
-        This function makes predictions if a list of lists in given as input.
+        This function makes predictions for lists of inputs, networks and targets.
 
-        :params inputs, networks, targets, recal
-        :return: predictions
+        :params inputs, networks, targets
         """
         for i, (inp, network, target) in enumerate(zip(inputs, networks, targets)):
             self.train_single(inp, network, target)
             self.clear()
 
     def train(self, inputs, targets, networks=None, epochs=50000):
+        """
+        This function implements the training for a given number of epochs and is the preferred interface to train the
+        network.
+
+        :param inputs, targets, networks
+        :param epochs:  [Optional] Number of epochs to train the network for. Defaults to 50,000.
+        """
         if not networks:
             networks = np.zeros(len(inputs), np.int32)
         else:
@@ -226,7 +249,17 @@ class rnn_train(rnn_base):
 
 
 class rnn_predict(rnn_base):
+    """
+    This is a sub-class of the `rnn_base` class, which implements the prediction methods.
+    """
     def __init__(self, weights, alpha=0.38, h_bias=True, log=False):
+        """
+        This function initializes the parameters for this class and the parent class.
+
+        :param weights: Either a string that points to the location of the weights pickle file, or the list from the
+                        un-pickled weights file. List should be of the format `[wih, whh, who, prh]`.
+        :param alpha, h_bias, log
+        """
         if isinstance(weights, str):
             [wih, whh, who, prh] = self.load(weights)
             logging.info('Weights loaded from pickle file')
