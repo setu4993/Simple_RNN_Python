@@ -326,7 +326,7 @@ class rnn_predict(rnn_base):
             predictions = self.predict_many(inputs, networks, recal=recal, targets=targets)
         elif isinstance(inputs[-1], int):
             if not networks:
-                networks = np.zeros(1)
+                networks = 0
             predictions = [self.predict_single(inputs, networks, recal=recal, target=targets)]
         else:
             raise TypeError('Type of `inputs` incorrect')
