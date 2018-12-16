@@ -318,13 +318,15 @@ class rnn_predict(rnn_base):
                       specified.
         :return: predictions
         """
-        if not networks:
-            networks = np.zeros(len(inputs), np.int32)
         if recal and not targets:
-                raise AttributeError('Attribute `targets` not found')
+            raise AttributeError('Attribute `targets` not found')
         if isinstance(inputs[-1], list):
+            if not networks:
+                networks = np.zeros(len(inputs), np.int32)
             predictions = self.predict_many(inputs, networks, recal=recal, targets=targets)
         elif isinstance(inputs[-1], int):
+            if not networks:
+                networks = np.zeros(1)
             predictions = [self.predict_single(inputs, networks, recal=recal, target=targets)]
         else:
             raise TypeError('Type of `inputs` incorrect')
