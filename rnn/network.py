@@ -271,7 +271,7 @@ class rnn_predict(rnn_base):
         rnn_base.__init__(self, wih, whh, who, prh, alpha=alpha, h_bias=h_bias, log=log)
         logging.info('Prediction RNN initialized')
 
-    def predict_single(self, inp, network, recal=False, target=None):
+    def predict_single(self, inp, network, recal=False, target=None, silent=False):
         """
         Makes a prediction for one set of input values.
 
@@ -284,16 +284,17 @@ class rnn_predict(rnn_base):
         if recal and target:
             self.backprop(input_nodes, self.downscale_output(target), network)
         prediction = self.upscale_output(self.output_nodes)[0]
-        if not recal:
-            print('The prediction for inputs ', inp, ' for network ', network, ' is %.2f' % prediction)
-        else:
-            print('The target for inputs ', inp, ' for network ', network, ' was ', target,
-                  'and the prediction was %.2f, error observed was %.2f%%. ' % (prediction,
-                                                                                abs(prediction - target) * 100
-                                                                                / target))
+        if not silent:
+            if not recal:
+                print('The prediction for inputs ', inp, ' for network ', network, ' is %.2f' % prediction)
+            else:
+                print('The target for inputs ', inp, ' for network ', network, ' was ', target,
+                      'and the prediction was %.2f, error observed was %.2f%%. ' % (prediction,
+                                                                                    abs(prediction - target) * 100
+                                                                                    / target))
         return prediction
 
-    def predict_many(self, inputs, networks, recal=False, targets=None):
+    def predict_many(self, inputs, networks, recal=False, targets=None, silent=False):
         """
         This function makes predictions if a list of lists in given as input.
 
@@ -304,19 +305,14 @@ class rnn_predict(rnn_base):
         predictions = []
         for i, inp in enumerate(inputs):
             if not recal:
-                predictions.append(self.predict_single(inp, networks[i], recal=recal))
-                print('The prediction for inputs ', inp, ' for network ', networks[i], ' is %.2f' % predictions[-1])
+                predictions.append(self.predict_single(inp, networks[i], recal=recal, silent=silent))
             else:
-                predictions.append(self.predict_single(inp, networks[i], recal=recal, target=targets[i]))
-                print('The target for inputs ', inp, ' for network ', networks[i], ' was ', targets[i],
-                      'and the prediction was %.2f, error observed was %.2f%%. ' % (predictions[-1],
-                                                                                 abs(predictions[-1] - targets[i]) * 100
-                                                                                 / targets[i]))
+                predictions.append(self.predict_single(inp, networks[i], recal=recal, target=targets[i], silent=silent))
             self.clear()
         logging.info('All predictions made')
         return predictions
 
-    def predict(self, inputs, networks=None, targets=None, recal=False):
+    def predict(self, inputs, networks=None, targets=None, recal=False, silent=False):
         """
         This function is the primary interface of the class. This is the function that should be called to make
         predictions and for back-propagation.
@@ -324,6 +320,7 @@ class rnn_predict(rnn_base):
         :param inputs, networks, targets
         :param recal: Boolean value specifying if the network should be re-calibrated. Requires the `targets` list to be
                       specified.
+        :param silent: Boolean value specifying if the method should run silently without printing output.
         :return: predictions
         """
         if recal and not targets:
@@ -331,11 +328,11 @@ class rnn_predict(rnn_base):
         if isinstance(inputs[-1], list):
             if not networks:
                 networks = np.zeros(len(inputs), np.int32)
-            predictions = self.predict_many(inputs, networks, recal=recal, targets=targets)
+            predictions = self.predict_many(inputs, networks, recal=recal, targets=targets, silent=silent)
         elif isinstance(inputs[-1], int):
             if not networks:
                 networks = 0
-            predictions = self.predict_single(inputs, networks, recal=recal, target=targets)
+            predictions = self.predict_single(inputs, networks, recal=recal, target=targets, silent=silent)
             self.clear()
         else:
             raise TypeError('Type of `inputs` incorrect')
