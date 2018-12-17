@@ -284,7 +284,13 @@ class rnn_predict(rnn_base):
         if recal and target:
             self.backprop(input_nodes, self.downscale_output(target), network)
         prediction = self.upscale_output(self.output_nodes)[0]
-        print('The prediction for inputs ', inp, ' for network ', network, ' is %.2f' % prediction)
+        if not recal:
+            print('The prediction for inputs ', inp, ' for network ', network, ' is %.2f' % prediction)
+        else:
+            print('The target for inputs ', inp, ' for network ', network, ' was ', target,
+                  'and the prediction was %.2f, error observed was %.2f%%. ' % (prediction,
+                                                                                abs(prediction - target) * 100
+                                                                                / target))
         return prediction
 
     def predict_many(self, inputs, networks, recal=False, targets=None):
